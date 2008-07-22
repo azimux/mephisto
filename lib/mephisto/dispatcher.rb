@@ -72,6 +72,12 @@ module Mephisto
     
     # returns an array with 3 values: [article_params, suffix, comment_id]
     def self.recognize_permalink(site, path)
+      # If it's a section name, then it's not a permalink, and we want
+      # to bail out so that :permalink can be used as an 'article url style'
+      # instead of, say, :year/:month/:day/:permalink
+      section_name = site.sections.detect { |s| s.path == path.join('/') }
+      return nil if !section_name.blank?
+
       full_path = path.join('/')
       regex, variables = build_permalink_regex_with(site.permalink_style)
       if match = regex.match(full_path)
